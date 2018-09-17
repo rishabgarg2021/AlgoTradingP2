@@ -1,0 +1,15 @@
+
+=============================== Log Started [2018-08-27 18:29:00 AEST] ===============================
+[2018-08-27 18:29:28,752:         agent.H1Bot]:     INFO - Requesting initial marketplace information.
+
+=============================== Log Started [2018-09-15 20:38:28 AEST] ===============================
+[2018-09-15 20:38:31,736:         agent.H1Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-15 20:38:39,129:         agent.H1Bot]:     INFO - Received initial marketplace information.
+[2018-09-15 20:38:39,129:         agent.H1Bot]:     INFO - my bot has a role ofRole.SELLER
+[2018-09-15 20:38:48,497:         agent.H1Bot]:    ERROR - Oops. Keyboard Interrupt received from user.
+
+=============================== Log Started [2018-09-17 17:04:04 AEST] ===============================
+[2018-09-17 17:04:05,826:         agent.H1Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 17:04:12,621:         agent.H1Bot]:     INFO - Received initial marketplace information.
+[2018-09-17 17:04:12,621:         agent.H1Bot]:     INFO - my bot has a role ofRole.BUYER
+[2018-09-17 17:05:49,776:         agent.H1Bot]:    ERROR - Oops. Keyboard Interrupt received from user.

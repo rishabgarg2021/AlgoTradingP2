@@ -1,0 +1,23 @@
+
+=============================== Log Started [2018-09-17 16:59:19 AEST] ===============================
+[2018-09-17 16:59:20,921:      agent.CAPM Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 16:59:22,879:      agent.CAPM Bot]:    ERROR - Oops! Something seriously went wrong.
+
+=============================== Log Started [2018-09-17 16:59:37 AEST] ===============================
+[2018-09-17 16:59:39,805:      agent.CAPM Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 16:59:40,871:      agent.CAPM Bot]:    ERROR - Oops! Something seriously went wrong.
+
+=============================== Log Started [2018-09-17 17:05:40 AEST] ===============================
+[2018-09-17 17:05:41,854:      agent.CAPM Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 17:05:43,942:      agent.CAPM Bot]:     INFO - Received initial marketplace information.
+[2018-09-17 17:05:49,807:      agent.CAPM Bot]:    ERROR - Oops. Keyboard Interrupt received from user.
+
+=============================== Log Started [2018-09-17 17:07:42 AEST] ===============================
+[2018-09-17 17:07:44,156:      agent.CAPM Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 17:07:46,532:      agent.CAPM Bot]:     INFO - Received initial marketplace information.
+[2018-09-17 17:07:47,571:      agent.CAPM Bot]:    ERROR - Oops. Keyboard Interrupt received from user.
+
+=============================== Log Started [2018-09-17 17:11:31 AEST] ===============================
+[2018-09-17 17:11:33,598:      agent.CAPM Bot]:     INFO - Requesting initial marketplace information.
+[2018-09-17 17:11:35,378:      agent.CAPM Bot]:     INFO - Received initial marketplace information.
+[2018-09-17 17:11:38,426:      agent.CAPM Bot]:    ERROR - Oops. Keyboard Interrupt received from user.
