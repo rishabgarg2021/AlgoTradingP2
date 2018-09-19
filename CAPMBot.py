@@ -36,16 +36,10 @@ class CAPMBot(Agent):
         self._role = -1
         self._current_unit_holdings = {}
 
-
     def initialised(self):
-        print(self.markets.items())
         for market_id, market_info in self.markets.items():
-
             security = market_info["item"]
-
             description = market_info["description"]
-            # updated the dictionary of payoffs of securtity
-            #with key as security and payoffs as value.
             self._payoffs[security] = [int(a) for a in description.split(",")]
 
         print("[MARKET INFO] ",self._markets_info)
@@ -70,11 +64,16 @@ class CAPMBot(Agent):
         test_portfolio = self._current_unit_holdings
         factor = 0
 
+        before_units = []
+        for key in self._current_unit_holdings:
+            before_units.append(self._current_unit_holdings[key])
+        order_units =[]
         #adjusts copy of portfolio for trades. Buys adds unit, sells deducts unit
         for i in orders:
+            order_units.append[i.units]
             if i.side == OrderSide.SELL:
                 factor = -1
-            else:
+            elif i.side == OrderSide.BUY:
                 factor = 1
             test_portfolio[self.get_item_name(i.market[-3:])] += factor*i.units #adjusts asset item units
 
@@ -84,8 +83,15 @@ class CAPMBot(Agent):
         holding_list = [] #all unit holdings as a 1d array
         payoff_matrix = [] #a 2d adday with all payoff values
         cov_matrix = [] #2d array with all payoff values as individual lists
+        order_cost = 0
 
-        #format the test portfolios to another variable with its values only
+        for order in orders:
+            if order.side == OrderSide.BUY:
+                order_cost += order.price*order.units
+            elif order.side == OrderSide.SELL:
+                order_cost -= order.price*order.units
+
+        #format the test portfolios to another variable with its values only i.e. [1,0,2,10] in order of stockA,B...note
         for key in test_portfolio:
             holding_list.append(test_portfolio[key])
         #print(holding_list)
@@ -101,22 +107,111 @@ class CAPMBot(Agent):
         #print("PORTFOLIO COV: ", portfolio_covariance)
 
         payoff_variance = np.dot(verticle_holding_list.T, np.dot(portfolio_covariance, holding_list))
-        print("PAYOFF VAR: ",payoff_variance)
+        #print("PAYOFF VAR: ",payoff_variance)
 
         expected_payoff = np.sum((verticle_holding_list*np.average(np.vstack(payoff_matrix))))
-        print("EXPECTED PAYOFF :", expected_payoff)
+        #print("EXPECTED PAYOFF :", expected_payoff)
 
-        performance = float(self.holdings["cash"]["available_cash"])+float(expected_payoff)-float(payoff_variance)*float(self._risk_penalty)
-        print("PERFORMANCE: ", performance)
+        performance = float(self.holdings["cash"]["available_cash"])-float(order_cost)+float(expected_payoff)-float(payoff_variance)*float(self._risk_penalty)
+        print("TEST PORTFOLIO: ", test_portfolio, " PERFORMANCE: ", performance)
 
-        pass
+
+#        return 0 if any of minimum units goes to negative or cash goes to negative
+        after_trade_cash = float(self.holdings["cash"]["available_cash"])-float(order_cost)
+        after_trade_holdings = np.array(before_units)+np.array(order_units)
+
+        if(after_trade_holdings<0 or min(after_trade_cash)<0):
+            return 0
+
+        return performance
 
     def is_portfolio_optimal(self):
         """
         Returns true if the current holdings are optimal (as per the performance formula), false otherwise.
         :return:
         """
-        pass
+        # Order(self, price, units, type, side, market, date=None, id=None, ref=None):)
+
+        Orders = []
+
+        #for every market item, loop through i.e. StockA, StockB etc.
+
+        for first_asset_range in range(-1, 1):
+            Orders.append(Order(self.get_trade_price(first_asset_range,self._market_ids.values()[0]), 1, OrderType.LIMIT, self.get_buy_sell(first_asset_range), self._market_ids[self._current_unit_holdings.key()[0],None, None, None]))
+            if len(self._current_unit_holdings) > 1 and len(self._current_unit_holdings) <=4:
+                for second_asset_range in range (-1, 1):
+                    Orders.append(Order(self.get_trade_price(second_asset_range,self._market_ids.values()[1]), 1, OrderType.LIMIT, self.get_buy_sell(second_asset_range), self._market_ids[self._current_unit_holdings.key()[1],None, None, None]))
+                    if len(self._current_unit_holdings) > 2 and len(self._current_unit_holdings) <=4:
+                        for third_asset_range in range(-1, 1):
+                            Orders.append(Order(self.get_trade_price(third_asset_range,self._market_ids.values()[2]), 1, OrderType.LIMIT, self.get_buy_sell(third_asset_range), self._market_ids[self._current_unit_holdings.key()[2],None, None, None]))
+                            if len(self._current_unit_holdings) > 3 and len(self._current_unit_holdings) <=4:
+                                for fourth_asset_range in range(-1, 1):
+                                    Orders.append(Order(self.get_trade_price(fourth_asset_range,self._market_ids.values()[3]), 1, OrderType.LIMIT, self.get_buy_sell(fourth_asset_range), self._market_ids[self._current_unit_holdings.key()[3],None, None, None]))
+                                    if self.get_potential_performance(Orders) > self.get_potential_performance():
+                                        return False
+                            elif self.get_potential_performance(Orders) > self.get_potential_performance():
+                                return False
+                    elif self.get_potential_performance(Orders) > self.get_potential_performance():
+                        return False
+            elif self.get_potential_performance(Orders) > self.get_potential_performance():
+                return False
+
+        #return true if none of the orders tested for each asset yielded improvement in performance.
+        return True
+
+    def get_buy_sell(self, unit):
+        if unit <=0:
+            return OrderSide.SELL
+        else:
+            return OrderSide.BUY
+
+    def get_trade_price(self, unit, market_id):
+        if unit < 0:
+            return self.get_best_bid(market_id, self.order_book)
+        elif unit > 0:
+            return self.get_best_ask(market_id, self.order_book)
+        else:
+            return 0
+
+
+    #reads order book and gets the lowest/best ask
+    def get_best_ask(self, market_id, order_book):
+        best_ask = self._markets_info[market_id]["maximum"]
+        for order in order_book:
+            if order.side == OrderSide.SELL and order.price < best_ask:
+                best_ask = order.price
+        return best_ask
+
+    #reads order book and gets the highest/best bid
+    def get_best_bid(self, market_id, order_book):
+        best_bid = self._markets_info[market_id]["minimum"]
+        for order in order_book:
+            if order.side == OrderSide.BUY and order.price > best_bid:
+                best_bid = order.price
+        return best_bid
+
+    #checks id order is valid
+    def order_checker(self, orders):
+        orders_cost = 0
+        test_portfolio = self._current_unit_holdings
+
+        for order in orders:
+            #gets the total cost of all orders, as well as effect on portfolio
+            if order.side == OrderSide.BUY:
+                orders_cost += order.price
+                test_portfolio[self.get_item_name(order.market)] += 1
+            #buy order must have enough unit of that market item
+            if order.side == OrderSide.SELL:
+                orders_cost -= order.price
+                test_portfolio[self.get_item_name(order.market)] -= 1
+
+        #rejects orders if it requires more cash than available, or if holdings of any asset is below 0
+        if self.holdings["cash"]["available_cash"] - orders_cost < 0:
+            return False
+        for item in test_portfolio:
+            if test_portfolio[item] < 0:
+                return False
+        return True
 
     #takes an market id (i.e 713) and returns the asset name of market id 713. Returns false otherwise.
     def get_item_name(self, market_id):
@@ -173,7 +268,7 @@ if __name__ == "__main__":
     FM_ACCOUNT = "bullish-delight"
     FM_EMAIL = "r.garg2@student.unimelb.edu.au"
     FM_PASSWORD = "796799"
-    MARKETPLACE_ID = 372  # replace this with the marketplace id
+    MARKETPLACE_ID = 387  # replace this with the marketplace id
 
     bot = CAPMBot(FM_ACCOUNT, FM_EMAIL, FM_PASSWORD, MARKETPLACE_ID)
     bot.run()
